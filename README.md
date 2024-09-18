@@ -59,6 +59,22 @@ One time initialisation
 make init
 ```
 
+### Testing
+
+Add test-cases related to your change in the [tests](/tests/) directory. For running tests use `pytest`. For testing with coverage install `pytest-cov`.
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run tests with coverage:
+
+```bash
+pytest --cov=elasticquerydsl tests/
+```
+
 ## Changelog
 
 Please find the changelog here: [CHANGELOG.md](CHANGELOG.md)

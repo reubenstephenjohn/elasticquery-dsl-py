@@ -16,12 +16,15 @@ def read(filename):
 
 
 # Package Dependencies
-install_requires = []
+install_requires = [
+    "typing-extensions",
+]
 
 # Dev Dependencies
 develop_requires = install_requires + [
     "nox",
     "pytest",
+    "pytest-cov",
     "pre-commit",
     "wheel",
     "pip>=20",

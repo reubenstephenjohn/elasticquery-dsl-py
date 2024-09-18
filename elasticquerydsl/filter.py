@@ -3,13 +3,35 @@ from elasticquerydsl.base import DSLQuery
 
 
 class FilterDSL(DSLQuery):
+    """
+    Base class for filter queries in Elasticsearch DSL.
+
+    This class serves as the foundation for queries that are primarily used in
+    filter context and do not contribute to scoring.
+    """
+
     def __init__(
         self, boost: t.Optional[float] = None, _name: t.Optional[str] = None
     ):
+        """
+        Initialize a FilterDSL instance.
+
+        Args:
+            boost (Optional[float]): Boost value to influence the relevance score of matching documents.
+            _name (Optional[str]): Optional name for the query.
+        """
         self.boost = boost
         self.name = _name
 
     def _make_query(self):
+        """
+        Construct the query dictionary.
+
+        This method should be implemented by subclasses.
+
+        Raises:
+            NotImplementedError: If the subclass does not implement this method.
+        """
         raise NotImplementedError
 
 
@@ -135,7 +157,7 @@ class MatchQuery(FilterDSL):
         :param lenient: Optional, whether to ignore format-based errors. [default: False]
         :param _name: Optional, name for the query. [default: None]
         """
-        super().__init__(_name)
+        super().__init__(boost, _name)
         self.field = field
         self.value = value
         self.operator = operator
@@ -148,7 +170,6 @@ class MatchQuery(FilterDSL):
         self.auto_generate_synonyms_phrase_query = (
             auto_generate_synonyms_phrase_query
         )
-        self.boost = boost
         self.lenient = lenient
         self.match_query = self._make_query()
 
@@ -568,11 +589,10 @@ class ScriptQuery(FilterDSL):
             boost (float, optional): Boost value to influence the relevance score of matching documents. [default: 1.0]
             _name (str, optional): The name for the query. [default: None]
         """
-        super().__init__(_name)
+        super().__init__(boost, _name)
         self.script = script
         self.params = params
         self.lang = lang
-        self.boost = boost
         self.script_query = self._make_query()
 
     def to_query(self):
