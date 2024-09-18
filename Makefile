@@ -27,6 +27,7 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 init: ## initialise Build Environment
+	git remote add upstream https://github.com/workindia/elasticquery-dsl-py
 	pip install -e '.[develop]'
 
 dist: clean ## builds source and wheel package
