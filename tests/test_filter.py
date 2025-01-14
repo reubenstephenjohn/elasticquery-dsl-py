@@ -16,7 +16,6 @@ from elasticquerydsl.filter import (
 )
 
 
-
 class TestFilterDSL(unittest.TestCase):
     def test_match_all_query(self):
         query = MatchAllQuery()
