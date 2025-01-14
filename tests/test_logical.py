@@ -92,6 +92,46 @@ class TestLogicalDSL(unittest.TestCase):
         }
         self.assertEqual(bool_query.to_query(), expected)
 
+    def test_logical_dsl_addition(self):
+        query1 = DummyQuery(content="query1")
+        query2 = DummyQuery(content="query2")
+        query3 = DummyQuery(content="query3")
+
+        must1 = BoolMust(query1)
+        must2 = BoolMust(query2)
+        combined_must = must1 + must2
+        expected_must = {
+            "must": [
+                {"dummy": "query1"},
+                {"dummy": "query2"},
+            ]
+        }
+        self.assertEqual(combined_must.to_query(), expected_must)
+
+        # Test adding a BoolMust and a single query
+        must_with_query = must1 + query3
+        expected_must_query = {
+            "must": [
+                {"dummy": "query1"},
+                {"dummy": "query3"},
+            ]
+        }
+        self.assertEqual(must_with_query.to_query(), expected_must_query)
+
+    def test_logical_dsl_addition_incompatible_types(self):
+        query1 = DummyQuery(content="query1")
+        query2 = DummyQuery(content="query2")
+        must = BoolMust(query1)
+        should = BoolShould(query2)
+        with self.assertRaises(NotImplementedError):
+            _ = must + should
+
+    def test_logical_dsl_addition_invalid_type(self):
+        query1 = DummyQuery(content="query1")
+        must = BoolMust(query1)
+        with self.assertRaises(NotImplementedError):
+            _ = must + "invalid"
+
     def test_bool_query_addition(self):
         query1 = DummyQuery(content="query1")
         query2 = DummyQuery(content="query2")
@@ -133,6 +173,18 @@ class TestLogicalDSL(unittest.TestCase):
             }
         }
         self.assertEqual(combined_query.to_query(), expected)
+
+    def test_bool_query_addition_invalid_type(self):
+        query1 = DummyQuery(content="query1")
+        bool_query = BoolQuery(must=BoolMust(query1))
+        with self.assertRaises(NotImplementedError):
+            _ = bool_query + "invalid"
+
+    def test_bool_query_or_invalid_type(self):
+        query1 = DummyQuery(content="query1")
+        bool_query = BoolQuery(must=BoolMust(query1))
+        with self.assertRaises(NotImplementedError):
+            _ = bool_query | "invalid"
 
     def test_bool_query_invert(self):
         query1 = DummyQuery(content="query1")

@@ -192,8 +192,16 @@ class LogicalDSL:
         self.queries = args
 
     def __add__(self, other: DSLQuery):
-        if isinstance(other, LogicalDSL):
+        if isinstance(other, self.__class__):
             return self.__class__(*self.queries, *other.queries)
+        if isinstance(other, LogicalDSL):
+            raise NotImplementedError(
+                f"Cannot perform `add` operation between {self.__class__.__name__} and {other.__class__.__name__} objects"
+            )
+        if not isinstance(other, DSLQuery):
+            raise NotImplementedError(
+                f"Cannot perform `add` operation between a LogicalDSL and {type(other).__name__} object"
+            )
         return self.__class__(*self.queries, other)
 
     __radd__ = __add__

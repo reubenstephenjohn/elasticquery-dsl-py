@@ -55,6 +55,10 @@ class MatchAllQuery(FilterDSL):
         self.match_all_query = self._make_query()
 
     def __add__(self, other: DSLQuery) -> DSLQuery:
+        if not isinstance(other, DSLQuery):
+            raise NotImplementedError(
+                f"Cannot perform `add` operation between a DSLQuery and {type(other).__name__} object"
+            )
         return other._clone()
 
     __and__ = __rand__ = __radd__ = __add__
@@ -104,6 +108,10 @@ class MatchNoneQuery(FilterDSL):
     __and__ = __rand__ = __radd__ = __add__
 
     def __or__(self, other: DSLQuery) -> DSLQuery:
+        if not isinstance(other, DSLQuery):
+            raise NotImplementedError(
+                f"Cannot perform `or` operation between a DSLQuery and {type(other).__name__} object"
+            )
         return other._clone()
 
     __ror__ = __or__
