@@ -107,6 +107,21 @@ class ScoreFunction:
     their Elasticsearch query representation.
     """
 
+    def __init__(
+        self,
+        query: t.Optional[DSLQuery] = None,
+        weight: t.Optional[float] = None,
+    ):
+        """
+        Initialize base ScoreFunction.
+
+        Args:
+            query (DSLQuery, optional): Query to filter which documents this function applies to
+            weight (float, optional): Weight to apply to this function's score
+        """
+        self.query = query
+        self.weight = weight
+
     def to_query(self):
         raise NotImplementedError(
             f"`to_query` func not implemented in subclass: {type(self).__name__}"
@@ -120,6 +135,7 @@ class ScriptScoreFunction(ScoreFunction):
         query: t.Optional[DSLQuery] = None,
         params: t.Optional[t.Dict[str, t.Any]] = None,
         lang: t.Optional[str] = None,
+        weight: t.Optional[float] = None,
     ):
         """
         Initializes a ScriptScoreFunction object.
@@ -134,9 +150,10 @@ class ScriptScoreFunction(ScoreFunction):
             query (DSLQuery, optional): Query to filter which documents this function applies to
             params (dict, optional): Parameters to pass to the script
             lang (str, optional): Script language (defaults to 'painless')
+            weight (float, optional): Weight to apply to this function's score
         """
+        super().__init__(query=query, weight=weight)
         self.script = script
-        self.query = query
         self.params = params
         self.lang = lang
 
@@ -149,6 +166,8 @@ class ScriptScoreFunction(ScoreFunction):
             script_score["script_score"]["script"]["lang"] = self.lang
         if self.query:
             script_score["filter"] = self.query.to_query()
+        if self.weight is not None:
+            script_score["weight"] = self.weight
 
         return script_score
 
@@ -159,6 +178,7 @@ class RandomScoreFunction(ScoreFunction):
         seed: t.Optional[int] = None,
         field: t.Optional[str] = None,
         query: t.Optional[DSLQuery] = None,
+        weight: t.Optional[float] = None,
     ):
         """
         Initializes a RandomScoreFunction object.
@@ -172,10 +192,11 @@ class RandomScoreFunction(ScoreFunction):
             seed (int, optional): Seed value for random number generation
             field (str, optional): Field to use for random number generation
             query (DSLQuery, optional): Query to filter which documents this function applies to
+            weight (float, optional): Weight to apply to this function's score
         """
+        super().__init__(query=query, weight=weight)
         self.seed = seed
         self.field = field
-        self.query = query
 
     def to_query(self):
         random_score = {"random_score": {}}
@@ -186,6 +207,8 @@ class RandomScoreFunction(ScoreFunction):
             random_score["random_score"]["field"] = self.field
         if self.query:
             random_score["filter"] = self.query.to_query()
+        if self.weight is not None:
+            random_score["weight"] = self.weight
 
         return random_score
 
@@ -198,6 +221,7 @@ class FieldValueFactorFunction(ScoreFunction):
         modifier: t.Optional[str] = None,
         missing: t.Optional[float] = None,
         query: t.Optional[DSLQuery] = None,
+        weight: t.Optional[float] = None,
     ):
         """
         Initializes a FieldValueFactorFunction object.
@@ -214,12 +238,13 @@ class FieldValueFactorFunction(ScoreFunction):
                                     (none|log|log1p|log2p|ln|ln1p|ln2p|square|sqrt|reciprocal)
             missing (float, optional): Value to use if document doesn't have the field
             query (DSLQuery, optional): Query to filter which documents this function applies to
+            weight (float, optional): Weight to apply to this function's score
         """
+        super().__init__(query=query, weight=weight)
         self.field = field
         self.factor = factor
         self.modifier = modifier
         self.missing = missing
-        self.query = query
 
     def to_query(self):
         field_value_factor = {"field_value_factor": {"field": self.field}}
@@ -234,6 +259,8 @@ class FieldValueFactorFunction(ScoreFunction):
             field_value_factor["field_value_factor"]["missing"] = self.missing
         if self.query:
             field_value_factor["filter"] = self.query.to_query()
+        if self.weight is not None:
+            field_value_factor["weight"] = self.weight
 
         return field_value_factor
 
@@ -249,6 +276,7 @@ class DecayFunction(ScoreFunction):
         decay: t.Optional[float] = None,
         query: t.Optional[DSLQuery] = None,
         multi_value_mode: t.Optional[str] = None,
+        weight: t.Optional[float] = None,
     ):
         """
         Initializes a DecayFunction object.
@@ -268,14 +296,15 @@ class DecayFunction(ScoreFunction):
             query (DSLQuery, optional): Query to filter which documents this function applies to
             multi_value_mode (str, optional): How to handle multi-valued fields
                                             (min|max|avg|sum)
+            weight (float, optional): Weight to apply to this function's score
         """
+        super().__init__(query=query, weight=weight)
         self.decay_type = decay_type
         self.field = field
         self.origin = origin
         self.scale = scale
         self.offset = offset
         self.decay = decay
-        self.query = query
         self.multi_value_mode = multi_value_mode
 
     def to_query(self):
@@ -295,6 +324,8 @@ class DecayFunction(ScoreFunction):
             ] = self.multi_value_mode
         if self.query:
             decay_function["filter"] = self.query.to_query()
+        if self.weight is not None:
+            decay_function["weight"] = self.weight
 
         return decay_function
 
@@ -317,8 +348,7 @@ class WeightFunction(ScoreFunction):
             weight (float): Weight to apply to matching documents
             query (DSLQuery, optional): Query to filter which documents this function applies to
         """
-        self.weight = weight
-        self.query = query
+        super().__init__(query=query, weight=weight)
 
     def to_query(self):
         weight_function = {"weight": self.weight}

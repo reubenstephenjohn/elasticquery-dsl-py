@@ -40,7 +40,9 @@ class TestScoreDSL(unittest.TestCase):
         # Basic function score query
         base_query = MatchQuery(field="title", value="python")
         script_function = ScriptScoreFunction(
-            script="doc['likes'].value / 10", params={"factor": 1.2}
+            script="doc['likes'].value / 10",
+            params={"factor": 1.2},
+            weight=1.5,
         )
         query = FunctionScoreQuery(
             query=base_query, functions=[script_function]
@@ -55,7 +57,8 @@ class TestScoreDSL(unittest.TestCase):
                                 "source": "doc['likes'].value / 10",
                                 "params": {"factor": 1.2},
                             }
-                        }
+                        },
+                        "weight": 1.5,
                     }
                 ],
             }
@@ -63,12 +66,16 @@ class TestScoreDSL(unittest.TestCase):
         self.assertEqual(query.to_query(), expected)
 
         # Complex function score query with multiple functions and parameters
-        random_function = RandomScoreFunction(seed=42)
+        random_function = RandomScoreFunction(seed=42, weight=0.8)
         field_factor_function = FieldValueFactorFunction(
-            field="popularity", factor=1.2, modifier="log1p"
+            field="popularity", factor=1.2, modifier="log1p", weight=1.3
         )
         decay_function = DecayFunction(
-            decay_type="gauss", field="date", origin="2023-01-01", scale="30d"
+            decay_type="gauss",
+            field="date",
+            origin="2023-01-01",
+            scale="30d",
+            weight=0.9,
         )
         weight_function = WeightFunction(weight=2.0)
 
@@ -97,20 +104,23 @@ class TestScoreDSL(unittest.TestCase):
                                 "source": "doc['likes'].value / 10",
                                 "params": {"factor": 1.2},
                             }
-                        }
+                        },
+                        "weight": 1.5,
                     },
-                    {"random_score": {"seed": 42}},
+                    {"random_score": {"seed": 42}, "weight": 0.8},
                     {
                         "field_value_factor": {
                             "field": "popularity",
                             "factor": 1.2,
                             "modifier": "log1p",
-                        }
+                        },
+                        "weight": 1.3,
                     },
                     {
                         "gauss": {
                             "date": {"origin": "2023-01-01", "scale": "30d"}
-                        }
+                        },
+                        "weight": 0.9,
                     },
                     {"weight": 2.0},
                 ],
