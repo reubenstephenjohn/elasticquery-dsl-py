@@ -749,3 +749,166 @@ class GeoDistanceQuery(FilterDSL):
             geo_distance_subquery["_name"] = self.name
 
         return {"geo_distance": geo_distance_subquery}
+
+
+class QueryStringQuery(FilterDSL):
+    def __init__(
+        self,
+        query: str,
+        default_field: t.Optional[str] = None,
+        fields: t.Optional[t.List[str]] = None,
+        type: t.Optional[str] = None,
+        allow_leading_wildcard: t.Optional[bool] = None,
+        analyze_wildcard: t.Optional[bool] = None,
+        analyzer: t.Optional[str] = None,
+        auto_generate_synonyms_phrase_query: t.Optional[bool] = None,
+        default_operator: t.Optional[str] = None,
+        enable_position_increments: t.Optional[bool] = None,
+        fuzziness: t.Optional[t.Union[str, int]] = None,
+        fuzzy_max_expansions: t.Optional[int] = None,
+        fuzzy_prefix_length: t.Optional[int] = None,
+        fuzzy_transpositions: t.Optional[bool] = None,
+        lenient: t.Optional[bool] = None,
+        max_determinized_states: t.Optional[int] = None,
+        minimum_should_match: t.Optional[t.Union[str, int]] = None,
+        quote_analyzer: t.Optional[str] = None,
+        phrase_slop: t.Optional[int] = None,
+        quote_field_suffix: t.Optional[str] = None,
+        rewrite: t.Optional[str] = None,
+        time_zone: t.Optional[str] = None,
+        boost: t.Optional[float] = None,
+        _name: t.Optional[str] = None,
+    ):
+        """
+        Initializes a QueryStringQuery object.
+
+        Use Cases:
+        - Provides a way to use Lucene query syntax for complex queries
+        - Allows searching across multiple fields with different boosts
+        - Supports wildcards, fuzzy matching, regular expressions, and range queries
+
+        Args:
+            query (str): The query string in Lucene syntax
+            default_field (str, optional): The default field to search if no field is specified
+            fields (List[str], optional): List of fields to search in
+            type (str, optional): The type of query ('best_fields', 'most_fields', 'cross_fields', etc.)
+            allow_leading_wildcard (bool, optional): Whether to allow wildcards at start of word
+            analyze_wildcard (bool, optional): Whether to analyze wildcard terms
+            analyzer (str, optional): The analyzer to use for the query string
+            auto_generate_synonyms_phrase_query (bool, optional): Whether to auto-generate phrase queries for synonyms
+            default_operator (str, optional): The default operator ('AND' or 'OR')
+            enable_position_increments (bool, optional): Whether to enable position increments in result queries
+            fuzziness (str | int, optional): Fuzziness parameter for fuzzy queries
+            fuzzy_max_expansions (int, optional): Maximum expansions for fuzzy queries
+            fuzzy_prefix_length (int, optional): Length of prefix not checked for fuzziness
+            fuzzy_transpositions (bool, optional): Whether to include transpositions for fuzzy queries
+            lenient (bool, optional): Whether to ignore format-based failures
+            max_determinized_states (int, optional): Maximum states a regex query can use
+            minimum_should_match (str | int, optional): Minimum number of clauses that must match
+            quote_analyzer (str, optional): Analyzer for quoted phrases
+            phrase_slop (int, optional): Maximum number of positions allowed between matching tokens
+            quote_field_suffix (str, optional): Suffix to append to fields for exact quoted matches
+            rewrite (str, optional): Method used to rewrite the query
+            time_zone (str, optional): Time zone to use for date/time fields
+            boost (float, optional): Boost value for the query
+            _name (str, optional): The name for the query
+        """
+        super().__init__(boost, _name)
+        self.query = query
+        self.default_field = default_field
+        self.fields = fields
+        self.type = type
+        self.allow_leading_wildcard = allow_leading_wildcard
+        self.analyze_wildcard = analyze_wildcard
+        self.analyzer = analyzer
+        self.auto_generate_synonyms_phrase_query = (
+            auto_generate_synonyms_phrase_query
+        )
+        self.default_operator = default_operator
+        self.enable_position_increments = enable_position_increments
+        self.fuzziness = fuzziness
+        self.fuzzy_max_expansions = fuzzy_max_expansions
+        self.fuzzy_prefix_length = fuzzy_prefix_length
+        self.fuzzy_transpositions = fuzzy_transpositions
+        self.lenient = lenient
+        self.max_determinized_states = max_determinized_states
+        self.minimum_should_match = minimum_should_match
+        self.quote_analyzer = quote_analyzer
+        self.phrase_slop = phrase_slop
+        self.quote_field_suffix = quote_field_suffix
+        self.rewrite = rewrite
+        self.time_zone = time_zone
+        self.query_string_query = self._make_query()
+
+    def to_query(self):
+        return self.query_string_query
+
+    def _make_query(self):  # noqa: C901
+        query_string_subquery = {"query": self.query}
+
+        if self.default_field:
+            query_string_subquery["default_field"] = self.default_field
+        if self.fields:
+            query_string_subquery["fields"] = self.fields
+        if self.type:
+            query_string_subquery["type"] = self.type
+        if self.allow_leading_wildcard is not None:
+            query_string_subquery["allow_leading_wildcard"] = (
+                self.allow_leading_wildcard
+            )
+        if self.analyze_wildcard is not None:
+            query_string_subquery["analyze_wildcard"] = self.analyze_wildcard
+        if self.analyzer:
+            query_string_subquery["analyzer"] = self.analyzer
+        if self.auto_generate_synonyms_phrase_query is not None:
+            query_string_subquery["auto_generate_synonyms_phrase_query"] = (
+                self.auto_generate_synonyms_phrase_query
+            )
+        if self.default_operator:
+            query_string_subquery["default_operator"] = self.default_operator
+        if self.enable_position_increments is not None:
+            query_string_subquery["enable_position_increments"] = (
+                self.enable_position_increments
+            )
+        if self.fuzziness is not None:
+            query_string_subquery["fuzziness"] = self.fuzziness
+        if self.fuzzy_max_expansions is not None:
+            query_string_subquery["fuzzy_max_expansions"] = (
+                self.fuzzy_max_expansions
+            )
+        if self.fuzzy_prefix_length is not None:
+            query_string_subquery["fuzzy_prefix_length"] = (
+                self.fuzzy_prefix_length
+            )
+        if self.fuzzy_transpositions is not None:
+            query_string_subquery["fuzzy_transpositions"] = (
+                self.fuzzy_transpositions
+            )
+        if self.lenient is not None:
+            query_string_subquery["lenient"] = self.lenient
+        if self.max_determinized_states is not None:
+            query_string_subquery["max_determinized_states"] = (
+                self.max_determinized_states
+            )
+        if self.minimum_should_match is not None:
+            query_string_subquery["minimum_should_match"] = (
+                self.minimum_should_match
+            )
+        if self.quote_analyzer:
+            query_string_subquery["quote_analyzer"] = self.quote_analyzer
+        if self.phrase_slop is not None:
+            query_string_subquery["phrase_slop"] = self.phrase_slop
+        if self.quote_field_suffix:
+            query_string_subquery["quote_field_suffix"] = (
+                self.quote_field_suffix
+            )
+        if self.rewrite:
+            query_string_subquery["rewrite"] = self.rewrite
+        if self.time_zone:
+            query_string_subquery["time_zone"] = self.time_zone
+        if self.boost is not None:
+            query_string_subquery["boost"] = self.boost
+        if self.name:
+            query_string_subquery["_name"] = self.name
+
+        return {"query_string": query_string_subquery}
