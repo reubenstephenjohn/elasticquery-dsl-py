@@ -13,8 +13,8 @@ from elasticquerydsl.filter import (
     ScriptQuery,
     RangeQuery,
     GeoDistanceQuery,
+    QueryStringQuery,
 )
-
 
 
 class TestFilterDSL(unittest.TestCase):
@@ -306,6 +306,69 @@ class TestFilterDSL(unittest.TestCase):
                 "validation_method": "IGNORE_MALFORMED",
                 "boost": 1.5,
                 "_name": "geo_distance_test",
+            }
+        }
+        self.assertEqual(query.to_query(), expected)
+
+    def test_query_string_query(self):
+        # Basic query string test
+        query = QueryStringQuery(query="python AND elasticsearch")
+        expected = {"query_string": {"query": "python AND elasticsearch"}}
+        self.assertEqual(query.to_query(), expected)
+
+        # Complex query string test with all parameters
+        query = QueryStringQuery(
+            query='title:python AND (description:elasticsearch OR description:"search engine")',
+            default_field="content",
+            fields=["title^2", "description"],
+            type="best_fields",
+            allow_leading_wildcard=False,
+            analyze_wildcard=True,
+            analyzer="standard",
+            auto_generate_synonyms_phrase_query=False,
+            default_operator="AND",
+            enable_position_increments=True,
+            fuzziness="AUTO",
+            fuzzy_max_expansions=50,
+            fuzzy_prefix_length=2,
+            fuzzy_transpositions=True,
+            lenient=True,
+            max_determinized_states=10000,
+            minimum_should_match="75%",
+            quote_analyzer="keyword",
+            phrase_slop=2,
+            quote_field_suffix=".exact",
+            rewrite="constant_score",
+            time_zone="+01:00",
+            boost=1.5,
+            _name="query_string_test",
+        )
+        expected = {
+            "query_string": {
+                "query": 'title:python AND (description:elasticsearch OR description:"search engine")',
+                "default_field": "content",
+                "fields": ["title^2", "description"],
+                "type": "best_fields",
+                "allow_leading_wildcard": False,
+                "analyze_wildcard": True,
+                "analyzer": "standard",
+                "auto_generate_synonyms_phrase_query": False,
+                "default_operator": "AND",
+                "enable_position_increments": True,
+                "fuzziness": "AUTO",
+                "fuzzy_max_expansions": 50,
+                "fuzzy_prefix_length": 2,
+                "fuzzy_transpositions": True,
+                "lenient": True,
+                "max_determinized_states": 10000,
+                "minimum_should_match": "75%",
+                "quote_analyzer": "keyword",
+                "phrase_slop": 2,
+                "quote_field_suffix": ".exact",
+                "rewrite": "constant_score",
+                "time_zone": "+01:00",
+                "boost": 1.5,
+                "_name": "query_string_test",
             }
         }
         self.assertEqual(query.to_query(), expected)
