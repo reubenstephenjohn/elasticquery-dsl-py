@@ -34,7 +34,7 @@ develop_requires = install_requires + [
 
 setup(
     name="elasticquery-dsl-py",
-    version="0.1.0",
+    version="1.0.0",
     url="https://github.com/workindia/elasticquery-dsl-py",
     license="MIT license",
     author="Nikhil Kumar",
