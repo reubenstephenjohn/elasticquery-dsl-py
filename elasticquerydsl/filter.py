@@ -751,6 +751,63 @@ class GeoDistanceQuery(FilterDSL):
         return {"geo_distance": geo_distance_subquery}
 
 
+class KnnQuery(FilterDSL):
+    def __init__(
+        self,
+        field: str,
+        query_vector: t.List[float],
+        k: int,
+        num_candidates: int,
+        filter: t.Optional[DSLQuery] = None,
+        boost: t.Optional[float] = None,
+        _name: t.Optional[str] = None,
+    ):
+        """
+        Initializes a KnnQuery object.
+
+        Use Cases:
+        - Retrieve nearest neighbors for dense_vector fields using approximate kNN.
+        - Combine vector retrieval with additional filters for hybrid search.
+
+        Args:
+            field (str): The dense_vector field name.
+            query_vector (List[float]): The vector used to find nearest neighbors.
+            k (int): Number of nearest neighbors to return.
+            num_candidates (int): Number of candidates to consider during ANN search.
+            filter (DSLQuery, optional): Query filter applied during kNN retrieval.
+            boost (float, optional): Boost value to influence the relevance score. [default: 1.0]
+            _name (str, optional): The name for the query. [default: None]
+        """
+        super().__init__(boost, _name)
+        self.field = field
+        self.query_vector = query_vector
+        self.k = k
+        self.num_candidates = num_candidates
+        self.filter = filter
+        self.boost = boost
+        self.knn_query = self._make_query()
+
+    def to_query(self):
+        return self.knn_query
+
+    def _make_query(self):
+        knn_subquery = {
+            "field": self.field,
+            "query_vector": self.query_vector,
+            "k": self.k,
+            "num_candidates": self.num_candidates,
+        }
+
+        if self.filter is not None:
+            knn_subquery["filter"] = self.filter.to_query()
+        if self.boost is not None:
+            knn_subquery["boost"] = self.boost
+        if self.name:
+            knn_subquery["_name"] = self.name
+
+        return {"knn": knn_subquery}
+
+
 class QueryStringQuery(FilterDSL):
     def __init__(
         self,

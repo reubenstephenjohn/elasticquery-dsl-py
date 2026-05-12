@@ -71,6 +71,7 @@ from elasticquerydsl.filter import (
     MultiMatchQuery,
     RangeQuery,
     GeoDistanceQuery,
+    KnnQuery,
     QueryStringQuery
 )
 
@@ -134,6 +135,31 @@ geo_query = GeoDistanceQuery(
 )
 print("Geo Distance Query:")
 print(geo_query.to_query())
+```
+
+### Dense Vector (KNN) Queries
+
+```python
+# kNN query for dense_vector retrieval
+knn_query = KnnQuery(
+    field="embedding",
+    query_vector=[0.12, -0.07, 0.34, 0.91],
+    k=10,
+    num_candidates=100
+)
+print("KNN Query:")
+print(knn_query.to_query())
+
+# Hybrid kNN query with an additional filter
+hybrid_knn_query = KnnQuery(
+    field="embedding",
+    query_vector=[0.12, -0.07, 0.34, 0.91],
+    k=10,
+    num_candidates=100,
+    filter=MatchQuery(field="status", value="active")
+)
+print("Hybrid KNN Query:")
+print(hybrid_knn_query.to_query())
 ```
 
 ### Query String and Complex Queries

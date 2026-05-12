@@ -13,6 +13,7 @@ from elasticquerydsl.filter import (
     ScriptQuery,
     RangeQuery,
     GeoDistanceQuery,
+    KnnQuery,
     QueryStringQuery,
 )
 
@@ -306,6 +307,46 @@ class TestFilterDSL(unittest.TestCase):
                 "validation_method": "IGNORE_MALFORMED",
                 "boost": 1.5,
                 "_name": "geo_distance_test",
+            }
+        }
+        self.assertEqual(query.to_query(), expected)
+
+    def test_knn_query(self):
+        query = KnnQuery(
+            field="embedding",
+            query_vector=[0.1, 0.2, 0.3],
+            k=10,
+            num_candidates=100,
+        )
+        expected = {
+            "knn": {
+                "field": "embedding",
+                "query_vector": [0.1, 0.2, 0.3],
+                "k": 10,
+                "num_candidates": 100,
+            }
+        }
+        self.assertEqual(query.to_query(), expected)
+
+        dsl_filter = TermQuery(field="status", value="active")
+        query = KnnQuery(
+            field="embedding",
+            query_vector=[0.1, 0.2, 0.3],
+            k=10,
+            num_candidates=100,
+            filter=dsl_filter,
+            boost=1.2,
+            _name="knn_test",
+        )
+        expected = {
+            "knn": {
+                "field": "embedding",
+                "query_vector": [0.1, 0.2, 0.3],
+                "k": 10,
+                "num_candidates": 100,
+                "filter": {"term": {"status": {"value": "active"}}},
+                "boost": 1.2,
+                "_name": "knn_test",
             }
         }
         self.assertEqual(query.to_query(), expected)
